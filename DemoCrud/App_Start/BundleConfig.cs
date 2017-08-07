@@ -25,6 +25,7 @@ namespace DemoCrud
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
+                      "~/Content/jquery.bootgrid.min.css",
                       "~/Content/site.css"));
         }
     }

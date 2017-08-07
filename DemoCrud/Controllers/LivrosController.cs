@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq.Dynamic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
@@ -15,33 +16,33 @@ namespace DemoCrud.Controllers
     {
         private LivrosContext db = new LivrosContext();
 
-        public PartialViewResult Listar(Livro livro, int pagina = 1, int registros = 5)
+        public JsonResult Listar(Livro livro, string searchPhrase, int current = 1, int rowCount = 5)
         {
+            string chave = Request.Form.AllKeys.First(k => k.StartsWith("sort"));
+            string ordenacao = Request[chave];
+            string campo = chave.Replace("sort[", string.Empty).Replace("]", string.Empty);
+
+            
+
             var livros = db.Livros.Include(l => l.Genero);
 
-            if (!String.IsNullOrWhiteSpace(livro.Titulo))
+            if ()
             {
-                livros = livros.Where(l => l.Titulo.Contains(livro.Titulo));
+                
             }
 
-            if (!String.IsNullOrWhiteSpace(livro.Autor))
+            string campoOrdenacao = String.Format("{0} {1}", campo, ordenacao);
+
+            var livrosPaginados = livros.OrderBy(campoOrdenacao).Skip((current-1) * rowCount).Take(rowCount);
+
+            return Json(new
             {
-                livros = livros.Where(l => l.Autor.Contains(livro.Autor));
-            }
-
-            if (livro.AnoEdicao != 0)
-            {
-                livros = livros.Where(l => l.AnoEdicao.Equals(livro.AnoEdicao));
-            }
-
-            if (livro.Valor != decimal.Zero)
-            {
-                livros = livros.Where(l=>l.Valor.Equals(livro.Valor));
-            }
-
-            var livrosPaginados = livros.OrderBy(l => l.Titulo).Skip((pagina-1) * registros).Take(registros);
-
-            return PartialView("_Listar", livrosPaginados.ToList());
+                rows = livrosPaginados.ToList(),
+                current = current,
+                rowCount = rowCount,
+                total = livros.Count()
+            }, 
+            JsonRequestBehavior.AllowGet);
         }
 
         // GET: Livros
